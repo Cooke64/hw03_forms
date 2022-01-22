@@ -37,4 +37,3 @@ class Group(models.Model):
 
     def get_absolute_url(self):
         return reverse('group', kwargs={'slug': self.slug})
-
