@@ -1,12 +1,10 @@
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.db.models import Count
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.mail import send_mail
-from django.views.decorators.csrf import csrf_exempt
 
 from .forms import PostForm
-from .models import *
+from .models import Post, User, Group
 
 
 send_mail(
@@ -106,4 +104,3 @@ def post_edit(request, post_id):
     is_edit = True
     context = {'form': form, 'is_edit': is_edit}
     return render(request, 'posts/create_post.html', context)
-
