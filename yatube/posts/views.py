@@ -1,19 +1,9 @@
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404, redirect
-from django.core.mail import send_mail
 
 from .forms import PostForm
 from .models import Post, User, Group
-
-
-send_mail(
-    'Тема письма',
-    'Текст письма.',
-    'from@example.com',
-    ['to@example.com'],
-    fail_silently=False,
-)
 
 AMOUNT_POST = 10
 
@@ -68,17 +58,16 @@ def group_posts(request, slug):
 
 
 def post_detail(request, post_id):
-    posts = get_object_or_404(Post, pk=post_id)
-    username = posts.author
+    post = get_object_or_404(Post, pk=post_id)
+    username = post.author
     username_obj = User.objects.get(username=username)
     posts_counter = username_obj.posts.count()
     template = 'posts/post_detail.html'
     title = 'Подробная информация'
     context = {
         'title': title,
-        'posts': posts,
+        'post': post,
         'posts_counter': posts_counter
-
     }
     return render(request, template, context)
 
@@ -89,7 +78,7 @@ def post_create(request):
     if form.is_valid():
         post = form.save(commit=False)
         post.author = request.user
-        form.save()
+        post.save()
         return redirect('post:profile', request.user)
     return render(request, 'posts/create_post.html', {'form': form})
 
