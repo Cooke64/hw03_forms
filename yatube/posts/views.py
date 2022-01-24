@@ -56,11 +56,10 @@ def group_posts(request, slug):
     }
     return render(request, template, context)
 
-
+# Исправлено в шаблоне post_detail
 def post_detail(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
-    username = post.author
-    username_obj = User.objects.get(username=username)
+    username_obj = User.objects.get(username=post.author)
     posts_counter = username_obj.posts.count()
     template = 'posts/post_detail.html'
     title = 'Подробная информация'
@@ -86,15 +85,27 @@ def post_create(request):
 @login_required
 def post_edit(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
+    form = PostForm(request.POST, instance=post)
     if post.author != request.user:
-        return redirect("post:post_detail", post_id=post_id)
-    elif request.method == 'POST':
-        form = PostForm(request.POST, instance=post)
-        form.save()
         return redirect('post:post_detail', post_id=post_id)
-    else:
-        form = PostForm(initial={'group': post.group, 'text': post.text})
+    if form.is_valid():
+        post.save()
+        return redirect('post:post_detail', post.pk,)
     is_edit = True
-    context = {'form': form, 'is_edit': is_edit, 'post': post}
-
+    context = {'form': form, 'is_edit': is_edit}
     return render(request, 'posts/create_post.html', context)
+# Второй вариант реализации подробнее и мне понятнее,чем первый.
+# @login_required
+# def post_edit(request, post_id):
+#     post = get_object_or_404(Post, pk=post_id)
+#     if post.author != request.user:
+#         return redirect('post:post_detail', post_id=post_id)
+#     elif request.method == 'POST':
+#         form = PostForm(request.POST, instance=post)
+#         form.save()
+#         return redirect('post:post_detail', post_id=post_id)
+#     else:
+#         form = PostForm(initial={'group': post.group, 'text': post.text})
+#     is_edit = True
+#     context = {'form': form, 'is_edit': is_edit, 'post': post}
+#     return render(request, 'posts/create_post.html', context)
